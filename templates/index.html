@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caesar Cipher Tool</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #ffffff;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      background: #111;
+      border-radius: 18px;
+      padding: 25px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 1.9rem;
+    }
+
+    p {
+      text-align: center;
+      font-size: 0.95rem;
+      color: #cccccc;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: none;
+      border-radius: 12px;
+      border: none;
+      padding: 12px;
+      font-size: 1rem;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    select,
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      opacity: 0.95;
+    }
+
+    .output {
+      margin-top: 20px;
+      background: #1c1c1c;
+      padding: 15px;
+      border-radius: 12px;
+      min-height: 55px;
+      font-size: 1rem;
+      word-wrap: break-word;
+    }
+
+    .note {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: #aaaaaa;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Caesar Cipher Tool</h1>
+    <p>Encrypt or decrypt text using the Caesar Cipher algorithm</p>
+
+    <textarea id="message" placeholder="Enter your message..."></textarea>
+
+    <div class="row">
+      <select id="mode">
+        <option value="encrypt">Encrypt</option>
+        <option value="decrypt">Decrypt</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <select id="shiftOption" onchange="toggleShift()">
+        <option value="default">Default Shift (3)</option>
+        <option value="custom">Custom Shift</option>
+      </select>
+      <input
+        type="number"
+        id="shiftValue"
+        placeholder="Enter shift"
+        min="0"
+        disabled
+      />
+    </div>
+
+    <button onclick="processText()">Process</button>
+
+    <div class="output" id="output">Output will appear here...</div>
+
+    <div class="note">
+      Default shift is 3 as defined in the Caesar Cipher algorithm
+    </div>
+  </div>
+
+  <script>
+    function toggleShift() {
+      const option = document.getElementById("shiftOption").value;
+      document.getElementById("shiftValue").disabled = option === "default";
+    }
+
+    async function processText() {
+      const message = document.getElementById("message").value;
+      const mode = document.getElementById("mode").value;
+      const shiftOption = document.getElementById("shiftOption").value;
+
+      let shift = 3; // default Caesar Cipher shift
+
+      if (shiftOption === "custom") {
+        shift = parseInt(document.getElementById("shiftValue").value);
+        if (isNaN(shift)) {
+          document.getElementById("output").innerText =
+            "Please enter a valid numeric shift value.";
+          return;
+        }
+      }
+
+      if (!message) {
+        document.getElementById("output").innerText = "Please enter a message.";
+        return;
+      }
+
+      try {
+        const response = await fetch("/process", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: message,
+            mode: mode,
+            shift: shift
+          })
+        });
+
+        const data = await response.json();
+        document.getElementById("output").innerText = data.result;
+      } catch (error) {
+        document.getElementById("output").innerText =
+          "Error connecting to backend.";
+      }
+    }
+  </script>
+
+</body>
+</html>
