@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
@@ -27,9 +27,17 @@ def decrypt(text, shift):
     return result
 
 
+# ✅ Root route (THIS FIXES THE 404)
+@app.route("/")
+def home():
+    return render_template("index.html")
+    # If you don't have HTML yet, temporarily use:
+    # return "Caesar Cipher API is running 🚀"
+
+
 @app.route("/process", methods=["POST"])
 def process():
-    data = request.json
+    data = request.get_json()
 
     text = data.get("message", "")
     mode = data.get("mode", "encrypt")
@@ -43,5 +51,6 @@ def process():
     return jsonify({"result": result})
 
 
+# ⚠️ For local testing only
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(host="0.0.0.0", port=10000, debug=True)
